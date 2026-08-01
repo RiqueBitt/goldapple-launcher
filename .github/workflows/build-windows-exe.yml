@@ -1,0 +1,59 @@
+name: Build Windows EXE (Aurora Launcher)
+
+# Roda manualmente (aba Actions > Build Windows EXE > Run workflow)
+# ou automaticamente a cada push na branch main/master.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v6
+
+      - name: Fix node-gyp e Python
+        run: python3 -m pip install --break-system-packages --user packaging setuptools
+
+      - name: Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Cache Electron
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ github.workspace }}/.cache/electron
+            ${{ github.workspace }}/.cache/electron-builder
+          key: windows-electron-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Build da UI + App
+        run: |
+          pnpm run --prefix xmcl-keystone-ui build
+          pnpm run --prefix xmcl-electron-app build
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+          NODE_ENV: production
+
+      # Gera o instalador .exe (NSIS) sem assinatura de código.
+      # O Windows Defender/SmartScreen pode alertar "editor desconhecido"
+      # até você comprar um certificado de assinatura de código.
+      - name: Upload do instalador .exe
+        uses: actions/upload-artifact@v6
+        with:
+          name: aurora-launcher-windows-installer
+          path: |
+            xmcl-electron-app/build/output/*.exe
