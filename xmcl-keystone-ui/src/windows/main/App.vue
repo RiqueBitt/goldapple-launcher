@@ -72,7 +72,7 @@ import { kLaunchButton, useLaunchButton } from '@/composables/launchButton'
 import { kLocalizedContent, useLocalizedContentControl } from '@/composables/localizedContent'
 import { useNotifier } from '@/composables/notifier'
 import { kCompact } from '@/composables/scrollTop'
-import { kSettingsState, kUpdateSettings } from '@/composables/setting'
+import { kSettingsState, kUpdateSettings, useUpdateSettings } from '@/composables/setting'
 import { useDialog } from '@/composables/dialog'
 import { kTheme } from '@/composables/theme'
 import { kTutorial } from '@/composables/tutorial'
@@ -122,7 +122,16 @@ const developerMode = computed(() => state.value?.developerMode ?? false)
 // Show a global "new update available" popup automatically, from anywhere in
 // the app (not just inside Settings). Only pops up once per version so it
 // doesn't nag the user again after they dismiss it in the same install.
-const { updateStatus, updateInfo } = injection(kUpdateSettings)
+// NOTE: build (not inject) kUpdateSettings here, then provide it downward —
+// App.vue is a child of Context, so useUpdateSettings()'s own injections
+// (kEnvironment/kSettingsState) resolve against Context's provides. Doing
+// this same construction *inside* Context.ts would break: a component can
+// never inject a value it provides itself, so Context calling
+// useUpdateSettings() (which injects kEnvironment/kSettingsState) would
+// throw and crash the whole app at startup.
+const updateSettings = useUpdateSettings()
+provide(kUpdateSettings, updateSettings)
+const { updateStatus, updateInfo } = updateSettings
 const { show: showUpdateInfoDialog } = useDialog('update-info')
 const seenUpdateVersion = useLocalStorage('seenUpdateVersion', '')
 watch([updateStatus, updateInfo], ([status, info]) => {
