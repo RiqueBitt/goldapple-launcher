@@ -44,6 +44,18 @@ jobs:
         shell: bash
         run: pnpm install --frozen-lockfile
 
+      - name: Definir versao do build
+        shell: bash
+        run: |
+          # A versao do package.json fica fixa (herdada do projeto original) e
+          # o auto-update do Electron compara essa versao, nao o numero do
+          # Release do GitHub. Sem isso, o launcher nunca detecta que ha uma
+          # versao mais nova depois do primeiro update.
+          VERSION="1.0.${{ github.run_number }}"
+          npm pkg set version="$VERSION"
+          npm pkg set version="$VERSION" --prefix xmcl-electron-app
+          echo "Versao do build: $VERSION"
+
       - name: Build da UI
         shell: bash
         run: pnpm run --prefix xmcl-keystone-ui build
@@ -75,6 +87,8 @@ jobs:
           path: |
             xmcl-electron-app/build/output/*.exe
             xmcl-electron-app/build/output/*.zip
+            xmcl-electron-app/build/output/*.blockmap
+            xmcl-electron-app/build/output/latest*.yml
           if-no-files-found: error
 
       # Publica como GitHub Release, marcado como "latest".
@@ -92,5 +106,7 @@ jobs:
           files: |
             xmcl-electron-app/build/output/*.exe
             xmcl-electron-app/build/output/*.zip
+            xmcl-electron-app/build/output/*.blockmap
+            xmcl-electron-app/build/output/latest*.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

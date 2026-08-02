@@ -34,6 +34,7 @@
     <AppGameExitDialog />
     <AppLaunchBlockedDialog />
     <AppUnauthenticatedWarningDialog />
+    <SettingUpdateInfoDialog />
     <AppImageDialog />
     <AppJoinServerDialog />
     <AppSharedTooltip />
@@ -71,7 +72,8 @@ import { kLaunchButton, useLaunchButton } from '@/composables/launchButton'
 import { kLocalizedContent, useLocalizedContentControl } from '@/composables/localizedContent'
 import { useNotifier } from '@/composables/notifier'
 import { kCompact } from '@/composables/scrollTop'
-import { kSettingsState } from '@/composables/setting'
+import { kSettingsState, kUpdateSettings } from '@/composables/setting'
+import { useDialog } from '@/composables/dialog'
 import { kTheme } from '@/composables/theme'
 import { kTutorial } from '@/composables/tutorial'
 import { kInFocusMode } from '@/composables/uiLayout'
@@ -90,6 +92,7 @@ import AppInstallSkipDialog from '@/views/AppInstallSkipDialog.vue'
 import AppInstanceDeleteDialog from '@/views/AppInstanceDeleteDialog.vue'
 import AppLaunchBlockedDialog from '@/views/AppLaunchBlockedDialog.vue'
 import AppUnauthenticatedWarningDialog from '@/views/AppUnauthenticatedWarningDialog.vue'
+import SettingUpdateInfoDialog from '@/views/SettingUpdateInfoDialog.vue'
 import AppJoinServerDialog from '@/views/AppJoinServerDialog.vue'
 import AppMigrateWizardDialog from '@/views/AppMigrateWizardDialog.vue'
 import AppMinecraftFriendsDialog from '@/views/AppMinecraftFriendsDialog.vue'
@@ -115,6 +118,19 @@ import { useInstanceGroupDefaultColor } from '@/composables/instanceGroup'
 const showSetup = ref(location.search.indexOf('bootstrap') !== -1)
 const { state } = injection(kSettingsState)
 const developerMode = computed(() => state.value?.developerMode ?? false)
+
+// Show a global "new update available" popup automatically, from anywhere in
+// the app (not just inside Settings). Only pops up once per version so it
+// doesn't nag the user again after they dismiss it in the same install.
+const { updateStatus, updateInfo } = injection(kUpdateSettings)
+const { show: showUpdateInfoDialog } = useDialog('update-info')
+const seenUpdateVersion = useLocalStorage('seenUpdateVersion', '')
+watch([updateStatus, updateInfo], ([status, info]) => {
+  if (status === 'none' || !info?.newUpdate) return
+  if (seenUpdateVersion.value === info.name) return
+  seenUpdateVersion.value = info.name
+  showUpdateInfoDialog()
+}, { immediate: true })
 
 
 provide('streamerMode', useLocalStorage('streamerMode', false, { writeDefaults: false }))

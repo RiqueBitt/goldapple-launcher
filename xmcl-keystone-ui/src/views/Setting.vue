@@ -95,7 +95,6 @@
         </section>
       </div>
 
-      <SettingUpdateInfoDialog />
       <SettingMigrationDialog />
     </div>
   </div>
@@ -104,7 +103,6 @@
 <script lang="ts" setup>
 import { ref, computed, nextTick, onMounted, onUnmounted, provide, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import SettingUpdateInfoDialog from './SettingUpdateInfoDialog.vue'
 import SettingUpdate from './SettingUpdate.vue'
 import SettingGeneral from './SettingGeneral.vue'
 import SettingMigrationDialog from './SettingMigrationDialog.vue'
@@ -112,7 +110,6 @@ import SettingGlobal from './SettingGlobal.vue'
 import SettingAbout from './SettingAbout.vue'
 import SettingNetwork from './SettingNetwork.vue'
 import { usePresence } from '@/composables/presence'
-import { kUpdateSettings, useUpdateSettings } from '@/composables/setting'
 import { kSurfaceTokens } from '@/composables/surfaceTokens'
 import { injection } from '@/util/inject'
 import { kTheme } from '@/composables/theme'
@@ -125,7 +122,6 @@ const { t } = useI18n()
 const route = useRoute()
 usePresence(computed(() => t('presence.setting')))
 
-provide(kUpdateSettings, useUpdateSettings())
 
 const { suppressed } = injection(kTheme)
 const tokens = injection(kSurfaceTokens)

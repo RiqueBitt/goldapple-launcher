@@ -28,12 +28,10 @@ import { extract as extractTar } from 'tar-stream'
 import { promisify } from 'util'
 import { createGunzip } from 'zlib'
 import { Logger, kGFW } from '~/infra'
-import { kSettings } from '~/settings'
 import { checksum } from '~/util/fs'
 import ElectronLauncherApp from '../ElectronLauncherApp'
 import { ensureElevateExe } from './elevate'
 
-const kPatched = Symbol('Patched')
 
 /**
  * Only download asar file update.
@@ -255,26 +253,11 @@ async function downloadFullUpdate(
     abortSignal?: AbortSignal
   },
 ): Promise<void> {
-  const gfw = await app.registry.get(kGFW)
-
-  if (gfw.inside) {
-    // @ts-ignore
-    const executor = appUpdater.httpExecutor as any
-    if (!(kPatched in executor)) {
-      const createRequest = executor.createRequest.bind(executor)
-      Object.assign(executor, {
-        [kPatched]: true,
-        createRequest: (options: any, callback: any) => {
-          if (gfw.inside) {
-            options.hostname = 'files.0xc.cn'
-            options.pathname = `/Soft_Mirrors/github-release/Voxelum/x-minecraft-launcher/LatestRelease/${basename(options.pathname)}`
-            app.emit('download-cdn', 'electron', basename(options.pathname))
-          }
-          return createRequest(options, callback)
-        },
-      })
-    }
-  }
+  // NOTE: the upstream XMCL project redirects Electron auto-updater
+  // downloads to a China-mirror of *its own* GitHub releases when behind the
+  // GFW. That mirror only ever has Voxelum/x-minecraft-launcher assets, so
+  // keeping it here would silently install the wrong app for this fork.
+  // Aurora Launcher always downloads straight from its own GitHub release.
 
   const tracker: ProgressTracker = {
     progress: 0,
@@ -315,75 +298,6 @@ export class ElectronUpdater implements LauncherAppUpdater {
 
   constructor(private app: ElectronLauncherApp) {
     this.logger = app.getLogger('ElectronUpdater')
-  }
-
-  async #getUpdateFromSelfHost(): Promise<ReleaseInfo> {
-    const app = this.app
-    this.logger.log('Try get update from selfhost')
-    const { allowPrerelease, locale } = await app.registry.get(kSettings)
-    const queryString = `version=v${app.version}&prerelease=${allowPrerelease || false}`
-    const primary = await this.app
-      .fetch(`https://api.xmcl.app/latest?${queryString}`, {
-        headers: {
-          'Accept-Language': locale,
-        },
-      })
-      .catch(() => undefined)
-    // The Deno edge may return a regional 404. Fall back for any non-success
-    // response as well as a transport failure.
-    const response = primary?.ok
-      ? primary
-      : await this.app.fetch(`https://xmcl-core-api.azurewebsites.net/api/latest?${queryString}`, {
-        headers: {
-          'Accept-Language': locale,
-        },
-      })
-    if (!response.ok) {
-      throw new AnyError(
-        'UpdateError',
-        `Fail to get update from selfhost: ${await response.text()}`,
-        {},
-        { status: response.status },
-      )
-    }
-    const result = (await response.json()) as any
-    const files = result.assets.map((a: any) => ({
-      url: a.browser_download_url,
-      name: a.name,
-    })) as Array<{ url: string; name: string }>
-    const platformString =
-      app.platform.os === 'windows' ? 'win' : app.platform.os === 'osx' ? 'mac' : 'linux'
-    const version = result.tag_name.substring(1)
-    const updateInfo: ReleaseInfo = {
-      name: result.tag_name,
-      body: result.body,
-      date: result.published_at,
-      files,
-      newUpdate: !isSameVersion(app.version, result.tag_name),
-      operation: ElectronUpdateOperation.Manual,
-    }
-
-    const hasAsar = files.some((f) => f.name === `app-${version}-${platformString}.asar`)
-    if (this.app.platform.os === 'windows') {
-      if (this.app.env === 'appx') {
-        updateInfo.operation = ElectronUpdateOperation.Appx
-      } else {
-        updateInfo.operation = hasAsar
-          ? ElectronUpdateOperation.Asar
-          : ElectronUpdateOperation.Manual
-      }
-    } else if (this.app.platform.os === 'osx') {
-      updateInfo.operation = hasAsar ? ElectronUpdateOperation.Asar : ElectronUpdateOperation.Manual
-    } else {
-      updateInfo.operation =
-        hasAsar && this.app.env !== 'appimage'
-          ? ElectronUpdateOperation.Asar
-          : ElectronUpdateOperation.Manual
-    }
-
-    this.logger.log(`Got operation=${updateInfo.operation} update from selfhost`)
-
-    return updateInfo
   }
 
   async #getUpdateFromAutoUpdater(): Promise<ReleaseInfo> {
@@ -480,18 +394,13 @@ export class ElectronUpdater implements LauncherAppUpdater {
   }
 
   async checkUpdateTask(): Promise<ReleaseInfo> {
-    if (this.app.platform.os === 'windows' || this.app.platform.os === 'osx') {
-      return this.#getUpdateFromSelfHost()
-    }
-    try {
-      return await this.#getUpdateFromAutoUpdater()
-    } catch (e) {
-      if (isSystemError(e) && e.code === 'ENOENT') {
-        return this.#getUpdateFromSelfHost()
-      }
-      this.logger.warn(e as Error)
-      throw e
-    }
+    // Aurora Launcher: always check this fork's own GitHub Releases
+    // (via electron-updater, configured through the `publish` block in
+    // electron-builder.config.ts -> owner/repo). The original XMCL
+    // self-host API (api.xmcl.app) is Voxelum's own service and knows
+    // nothing about this fork, so it must never be used here — it would
+    // report version/changelog/downloads for the wrong app entirely.
+    return await this.#getUpdateFromAutoUpdater()
   }
 
   async downloadUpdate(updateInfo: ReleaseInfo, options?: DownloadUpdateOptions): Promise<void> {

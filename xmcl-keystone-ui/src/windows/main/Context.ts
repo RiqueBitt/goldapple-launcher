@@ -51,7 +51,7 @@ import { kResourcePackSearch, useResourcePackSearch } from '@/composables/resour
 import { kSaveSearch, useSavesSearch } from '@/composables/savesSearch'
 import { kSearchModel, useSearchModel } from '@/composables/search'
 import { kServerStatusCache, useServerStatusCache } from '@/composables/serverStatus'
-import { kSettingsState, useSettingsState } from '@/composables/setting'
+import { kSettingsState, useSettingsState, kUpdateSettings, useUpdateSettings } from '@/composables/setting'
 import {
   DEFAULT_CARD_CLICKABLE_RADIUS,
   DEFAULT_CARD_ITEM_RADIUS,
@@ -187,6 +187,7 @@ export default defineComponent({
     provide(kLatestMinecraftVersion, useMinecraftLatestRelease())
     provide(kJavaContext, java)
     provide(kSettingsState, settings)
+    provide(kUpdateSettings, useUpdateSettings())
     provide(kInstances, instances)
     provide(kInstance, instance)
     provide(kLocalVersions, localVersions)
