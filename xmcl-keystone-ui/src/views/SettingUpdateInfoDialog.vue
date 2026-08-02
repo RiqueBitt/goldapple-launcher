@@ -94,6 +94,7 @@ import { kEnvironment } from '@/composables/environment'
 import { kSettingsState, kUpdateSettings } from '@/composables/setting'
 import { injection } from '@/util/inject'
 import { useDialog } from '../composables/dialog'
+import { useNotifier } from '@/composables/notifier'
 
 const { isShown } = useDialog('update-info')
 const { t } = useI18n()
@@ -118,12 +119,24 @@ const hintRedownload = computed(() =>
 
 // Um clique só: baixa (se ainda nao baixou) e, assim que terminar, ja fecha
 // e reinicia instalando a versao nova. O usuario nao precisa clicar duas vezes.
+const { notify } = useNotifier()
 const updating = computed(() => downloadingUpdate.value || installing.value)
 async function updateNow() {
-  if (updateStatus.value === 'pending') {
-    await downloadUpdate()
+  try {
+    if (updateStatus.value === 'pending') {
+      await downloadUpdate()
+    }
+    await quitAndInstall()
+  } catch (e) {
+    // Antes isso falhava em silencio (o botao so parava de girar e nada
+    // acontecia). Agora mostra o erro real pra dar pra diagnosticar.
+    console.error('[update] falhou ao atualizar', e)
+    notify({
+      level: 'error',
+      title: t('launcherUpdate.updateFailed'),
+      body: e instanceof Error ? e.message : String(e),
+    })
   }
-  await quitAndInstall()
 }
 
 const openGithub = () => {

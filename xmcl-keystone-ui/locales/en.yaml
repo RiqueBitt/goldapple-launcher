@@ -763,6 +763,7 @@ launcherUpdate:
   updateToThisVersion: Download and Install
   updateNow: Update now
   later: Later
+  updateFailed: Failed to update
   newVersionAvailable: A new version of GoldApple Launcher is available.
 localVersion:
   auto: Auto Computed
