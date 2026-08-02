@@ -1,4 +1,4 @@
-name: Build Windows EXE (Aurora Launcher)
+name: Build Windows EXE (GoldApple Launcher)
 
 # Roda manualmente (aba Actions > Build Windows EXE > Run workflow)
 # ou automaticamente a cada push na branch main/master.
@@ -83,7 +83,7 @@ jobs:
       - name: Upload do instalador (artifact do run)
         uses: actions/upload-artifact@v6
         with:
-          name: aurora-launcher-windows-installer
+          name: goldapple-launcher-windows-installer
           path: |
             xmcl-electron-app/build/output/*.exe
             xmcl-electron-app/build/output/*.zip
@@ -100,7 +100,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
-          name: Aurora Launcher build ${{ github.run_number }}
+          name: GoldApple Launcher build ${{ github.run_number }}
           make_latest: true
           fail_on_unmatched_files: true
           files: |

@@ -186,7 +186,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
     const minMemory: number | undefined = options.minMemory
     const maxMemory: number | undefined = options.maxMemory
 
-    const launcherName = `Aurora Launcher (${this.app.version})`
+    const launcherName = `GoldApple Launcher (${this.app.version})`
     const javawPath = join(dirname(javaPath), process.platform === 'win32' ? 'javaw.exe' : 'javaw')
     const validJavaPath = await this.#isValidAndExeucatable(javawPath) ? javawPath : javaPath
     const prepend = normalizeCommandLine(options.prependCommand)
@@ -698,7 +698,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
     const filePath = join(logsDir, `${LAUNCH_FAILURE_PREFIX}${stamp}.log`)
 
     const header = [
-      `# Aurora Launcher abnormal-exit dump`,
+      `# GoldApple Launcher abnormal-exit dump`,
       `# Operation:        ${info.operationId}`,
       `# Exit code:        ${info.code ?? '(none)'}`,
       `# Signal:           ${info.signal ?? '(none)'}`,

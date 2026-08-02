@@ -204,7 +204,7 @@ async function downloadAppInstaller(
     tracker?: Tracker<DownloadUpdateTrackerEvents>
   } & DownloadBaseOptions,
 ): Promise<void> {
-  const destination = join(app.getPath('downloads'), 'Aurora Launcher.appinstaller')
+  const destination = join(app.getPath('downloads'), 'GoldApple Launcher.appinstaller')
   const url = 'https://xmcl.blob.core.windows.net/releases/xmcl.appinstaller'
 
   await download({
@@ -257,7 +257,7 @@ async function downloadFullUpdate(
   // downloads to a China-mirror of *its own* GitHub releases when behind the
   // GFW. That mirror only ever has Voxelum/x-minecraft-launcher assets, so
   // keeping it here would silently install the wrong app for this fork.
-  // Aurora Launcher always downloads straight from its own GitHub release.
+  // GoldApple Launcher always downloads straight from its own GitHub release.
 
   const tracker: ProgressTracker = {
     progress: 0,
@@ -394,7 +394,7 @@ export class ElectronUpdater implements LauncherAppUpdater {
   }
 
   async checkUpdateTask(): Promise<ReleaseInfo> {
-    // Aurora Launcher: always check this fork's own GitHub Releases
+    // GoldApple Launcher: always check this fork's own GitHub Releases
     // (via electron-updater, configured through the `publish` block in
     // electron-builder.config.ts -> owner/repo). The original XMCL
     // self-host API (api.xmcl.app) is Voxelum's own service and knows

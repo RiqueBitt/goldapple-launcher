@@ -5,24 +5,24 @@ import type { Configuration } from 'electron-builder'
 dotenv()
 
 export const config = {
-  productName: 'Aurora Launcher',
-  appId: 'com.aurora.launcher',
+  productName: 'GoldApple Launcher',
+  appId: 'com.goldapple.launcher',
   directories: {
     output: 'build/output',
     buildResources: 'build',
     app: '.',
   },
   protocols: {
-    name: 'Aurora',
-    schemes: ['aurora'],
+    name: 'GoldApple',
+    schemes: ['goldapple'],
   },
   // assign publish for auto-updater
   // TROQUE "SEU-USUARIO" pelo seu usuário/organização do GitHub e
-  // "aurora-launcher" pelo nome do seu repositório.
+  // "goldapple-launcher" pelo nome do seu repositório.
   publish: [{
     provider: 'github',
     owner: 'RiqueBitt',
-    repo: 'aurora-launcher',
+    repo: 'goldapple-launcher',
   }],
   files: [{
     from: 'dist',
@@ -33,18 +33,18 @@ export const config = {
     to: '.',
     filter: 'package.json',
   }],
-  artifactName: 'aurora-launcher-${version}-${platform}-${arch}.${ext}',
+  artifactName: 'goldapple-launcher-${version}-${platform}-${arch}.${ext}',
   appx: {
-    displayName: 'Aurora Launcher',
-    applicationId: 'AuroraLauncher',
-    identityName: 'AuroraLauncher',
+    displayName: 'GoldApple Launcher',
+    applicationId: 'GoldAppleLauncher',
+    identityName: 'GoldAppleLauncher',
     backgroundColor: 'transparent',
     publisher: process.env.PUBLISHER,
-    publisherDisplayName: 'Aurora',
+    publisherDisplayName: 'GoldApple',
     setBuildNumber: true,
   },
   dmg: {
-    artifactName: 'xmcl-${version}-${arch}.${ext}',
+    artifactName: 'goldapple-launcher-${version}-${arch}.${ext}',
     contents: [
       {
         x: 410,
@@ -77,7 +77,7 @@ export const config = {
   },
   win: {
     certificateFile: undefined as string | undefined,
-    publisherName: 'Aurora',
+    publisherName: 'GoldApple',
     icon: 'icons/dark.ico',
     electronLanguages: ['en-US'],
     target: [
@@ -98,7 +98,7 @@ export const config = {
     ],
   },
   nsis: {
-    artifactName: 'aurora-launcher-setup-${version}.${ext}',
+    artifactName: 'goldapple-launcher-setup-${version}.${ext}',
     oneClick: false,
     allowToChangeInstallationDirectory: true,
     createDesktopShortcut: true,
@@ -113,7 +113,7 @@ export const config = {
     },
     category: 'Game',
     icon: 'icons/dark.icns',
-    artifactName: 'xmcl-${version}-${arch}.${ext}',
+    artifactName: 'goldapple-launcher-${version}-${arch}.${ext}',
     target: [
       { target: 'deb', arch: ['x64', 'arm64'] },
       { target: 'rpm', arch: ['x64', 'arm64'] },
