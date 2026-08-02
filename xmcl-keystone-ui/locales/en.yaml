@@ -761,6 +761,9 @@ launcherUpdate:
   installAndQuit: Restart to Install
   noUpdateAvailable: No Update Available
   updateToThisVersion: Download and Install
+  updateNow: Update now
+  later: Later
+  newVersionAvailable: A new version of GoldApple Launcher is available.
 localVersion:
   auto: Auto Computed
   empty: No Version Installed
