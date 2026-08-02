@@ -101,6 +101,9 @@ jobs:
         with:
           tag_name: v${{ github.run_number }}
           name: GoldApple Launcher build ${{ github.run_number }}
+          # Descricao curta que aparece no popup de atualizacao do launcher:
+          # a propria mensagem do commit que gerou este build.
+          body: ${{ github.event.head_commit.message }}
           make_latest: true
           fail_on_unmatched_files: true
           files: |

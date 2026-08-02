@@ -15,6 +15,12 @@
           {{ t('launcherUpdate.newVersionAvailable') }}
         </v-card-subtitle>
       </v-card-item>
+      <v-card-text
+        v-if="shortDescription"
+        class="update-description"
+      >
+        {{ shortDescription }}
+      </v-card-text>
       <v-alert
         v-if="isAppX"
         variant="tonal"
@@ -99,6 +105,13 @@ const {
 
 const env = injection(kEnvironment)
 const isAppX = computed(() => env.value?.env === 'appx')
+// Descricao curta (a mensagem do commit do build), sem renderizar markdown —
+// so um resumo simples do que mudou, nao o changelog inteiro.
+const shortDescription = computed(() => {
+  const raw = updateInfo.value?.body ?? ''
+  const firstLine = raw.split('\n').find((l) => l.trim().length > 0) ?? ''
+  return firstLine.slice(0, 200)
+})
 const hintRedownload = computed(() =>
   state.value?.updateInfo?.operation === 'manual',
 )
@@ -118,5 +131,11 @@ const openGithub = () => {
 }
 </script>
 
-<style>
+<style scoped>
+.update-description {
+  padding-top: 0;
+  padding-bottom: 8px;
+  color: rgba(var(--v-theme-on-surface), 0.75);
+  font-size: 13px;
+}
 </style>
