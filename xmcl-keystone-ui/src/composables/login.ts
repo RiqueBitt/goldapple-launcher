@@ -73,7 +73,12 @@ const strictLocales = [
   'ko-KR', // 韩国 (South Korea)
 ]
 
+// MODIFICADO: Agora sempre retorna true para permitir criar perfil offline
 export function useAllowThirdparty() {
+  // A função agora sempre retorna true, permitindo criar perfil offline sem necessidade de logar na Microsoft
+  return computed(() => true)
+  
+  /* Código original comentado:
   const { state: setting } = injection(kSettingsState)
   const { users } = injection(kUserContext)
   const allowThirdParty = computed(() => {
@@ -84,6 +89,7 @@ export function useAllowThirdparty() {
     return true
   })
   return allowThirdParty
+  */
 }
 
 export function useAuthorityItems(authorities: Ref<AuthorityMetadata[] | undefined>) {
@@ -93,18 +99,24 @@ export function useAuthorityItems(authorities: Ref<AuthorityMetadata[] | undefin
     if (!authorities.value) return []
     const result = [] as AuthorityItem[]
     for (const v of authorities.value) {
+      // MODIFICADO: Agora sempre inclui o modo offline (AUTHORITY_DEV) mesmo sem thirdParty
+      if (v.authority === AUTHORITY_DEV) {
+        result.push({
+          value: AUTHORITY_DEV,
+          text: t('userServices.offline.name'),
+          icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzg4OCIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=',
+        })
+        continue // Pula o resto da lógica para este item
+      }
+      
+      // MODIFICADO: Permite serviços de terceiros se thirdParty for true
       if (!thirdParty.value && v.authority !== AUTHORITY_MICROSOFT) continue
+      
       if (v.authority === AUTHORITY_MICROSOFT) {
         result.push({
           value: AUTHORITY_MICROSOFT,
           text: t('userServices.microsoft.name'),
           icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMSAyMSI+PHJlY3QgeD0iMSIgeT0iMSIgd2lkdGg9IjkiIGhlaWdodD0iOSIgZmlsbD0iI2YyNTAyMiIvPjxyZWN0IHg9IjExIiB5PSIxIiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiBmaWxsPSIjN2ZiYTAwIi8+PHJlY3QgeD0iMSIgeT0iMTEiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiMwMGE0ZWYiLz48cmVjdCB4PSIxMSIgeT0iMTEiIHdpZHRoPSI5IiBoZWlnaHQ9IjkiIGZpbGw9IiNmZmI5MDAiLz48L3N2Zz4=',
-        })
-      } else if (v.authority === AUTHORITY_DEV) {
-        result.push({
-          value: AUTHORITY_DEV,
-          text: t('userServices.offline.name'),
-          icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzg4OCIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=',
         })
       } else {
         // Use custom SVG icons or fallback to favicon
