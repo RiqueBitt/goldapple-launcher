@@ -41,35 +41,55 @@ jobs:
           key: windows-electron-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Instalar dependências
+        shell: bash
         run: pnpm install --frozen-lockfile
 
-      - name: Build da UI + App
-        run: |
-          pnpm run --prefix xmcl-keystone-ui build
-          pnpm run --prefix xmcl-electron-app build
+      - name: Build da UI
+        shell: bash
+        run: pnpm run --prefix xmcl-keystone-ui build
         env:
           NODE_OPTIONS: --max-old-space-size=8192
           NODE_ENV: production
 
+      - name: Build do App (electron-builder)
+        shell: bash
+        run: pnpm run --prefix xmcl-electron-app build
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+          NODE_ENV: production
+
+      - name: Listar arquivos gerados (debug)
+        shell: bash
+        run: |
+          echo "Conteúdo de xmcl-electron-app/build/output:"
+          ls -la xmcl-electron-app/build/output || echo "Pasta não existe"
+
       # Gera o instalador .exe (NSIS) sem assinatura de código.
       # O Windows Defender/SmartScreen pode alertar "editor desconhecido"
       # até você comprar um certificado de assinatura de código.
-      - name: Upload do instalador .exe (artifact do run)
+      - name: Upload do instalador (artifact do run)
         uses: actions/upload-artifact@v6
         with:
           name: aurora-launcher-windows-installer
           path: |
             xmcl-electron-app/build/output/*.exe
+            xmcl-electron-app/build/output/*.zip
+          if-no-files-found: error
 
-      # Publica o .exe como GitHub Release, marcado como "latest".
+      # Publica como GitHub Release, marcado como "latest".
       # É o que faz o botão "Baixar para Windows" do site funcionar,
       # já que ele aponta para /releases/latest.
+      # fail_on_unmatched_files garante que, se nada for gerado, o
+      # workflow falhe de forma visível em vez de criar uma release vazia.
       - name: Publicar GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
           name: Aurora Launcher build ${{ github.run_number }}
           make_latest: true
-          files: xmcl-electron-app/build/output/*.exe
+          fail_on_unmatched_files: true
+          files: |
+            xmcl-electron-app/build/output/*.exe
+            xmcl-electron-app/build/output/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
