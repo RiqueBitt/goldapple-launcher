@@ -21,7 +21,7 @@ export const config = {
   // "aurora-launcher" pelo nome do seu repositório.
   publish: [{
     provider: 'github',
-    owner: 'SEU-USUARIO',
+    owner: 'RiqueBitt',
     repo: 'aurora-launcher',
   }],
   files: [{
