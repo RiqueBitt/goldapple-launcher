@@ -283,6 +283,68 @@ async function downloadFullUpdate(
   await appUpdater.downloadUpdate(cancellationToken)
 }
 
+// GoldApple Launcher publishes to this GitHub repo (see the `publish` block
+// in xmcl-electron-app/build/electron-builder.config.ts — keep these two in
+// sync if the repo ever moves).
+const GITHUB_OWNER = 'RiqueBitt'
+const GITHUB_REPO = 'goldapple-launcher'
+
+/**
+ * electron-updater decides "there is an update" purely from `latest.yml`,
+ * which GitHub serves the moment it's uploaded. If a release is put together
+ * by hand (drag files onto the GitHub release page) the .yml can go public
+ * seconds before the actual installer .exe has finished uploading. The
+ * launcher would then show "update available", and clicking it would try to
+ * download an asset that isn't there yet (or is only partially uploaded) —
+ * which looks like the button does nothing.
+ *
+ * This double-checks the real GitHub release for the version electron-updater
+ * found, and only says "ready" once every asset it needs is actually present
+ * and fully uploaded (GitHub marks assets still being uploaded as
+ * `state: 'starter'`; finished ones are `state: 'uploaded'`).
+ */
+async function areReleaseAssetsReady(
+  app: ElectronLauncherApp,
+  version: string,
+  expectedFileNames: string[],
+): Promise<boolean> {
+  const tag = version.startsWith('v') ? version : `v${version}`
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/tags/${tag}`
+
+  try {
+    const response = await app.fetch(url, {
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+    if (!response.ok) {
+      // Can't confirm one way or the other (rate limited, offline, GitHub
+      // hiccup, release not indexed yet, ...) — don't block the update on
+      // this check, just defer to whatever electron-updater already decided.
+      return true
+    }
+
+    const data = (await response.json()) as {
+      draft?: boolean
+      assets?: { name: string; state?: string; size?: number }[]
+    }
+
+    // Draft releases are not public, so they're never really "ready".
+    if (data.draft) return false
+
+    const assets = data.assets ?? []
+    for (const name of expectedFileNames) {
+      const asset = assets.find((a) => a.name === name)
+      if (!asset || asset.state === 'starter' || (asset.size ?? 0) === 0) {
+        return false
+      }
+    }
+    return true
+  } catch {
+    // Network hiccup — fail open so a temporary connectivity issue never
+    // permanently blocks the updater.
+    return true
+  }
+}
+
 function isSameVersion(a: string, b: string) {
   if (a.startsWith('v')) {
     a = a.substring(1)
@@ -308,12 +370,28 @@ export class ElectronUpdater implements LauncherAppUpdater {
     if (!info) throw new Error('No update info found')
 
     const files = info.updateInfo.files.map((f) => ({ name: basename(f.url), url: f.url }))
+    let newUpdate = !isSameVersion(info.updateInfo.version, this.app.version)
+
+    if (newUpdate && files.length > 0) {
+      const ready = await areReleaseAssetsReady(
+        this.app,
+        info.updateInfo.version,
+        files.map((f) => f.name),
+      )
+      if (!ready) {
+        this.logger.log(
+          `Update ${info.updateInfo.version} was found but its release assets are not fully uploaded yet — waiting for the next check instead of prompting the user`,
+        )
+        newUpdate = false
+      }
+    }
+
     const release: ReleaseInfo = {
       name: info.updateInfo.version,
       body: info.updateInfo.releaseNotes as string,
       date: info.updateInfo.releaseDate,
       files,
-      newUpdate: !isSameVersion(info.updateInfo.version, this.app.version),
+      newUpdate,
       operation: ElectronUpdateOperation.AutoUpdater,
     }
 
