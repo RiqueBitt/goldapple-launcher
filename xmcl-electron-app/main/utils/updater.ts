@@ -283,11 +283,15 @@ async function downloadFullUpdate(
   await appUpdater.downloadUpdate(cancellationToken)
 }
 
-// GoldApple Launcher publishes to this GitHub repo (see the `publish` block
-// in xmcl-electron-app/build/electron-builder.config.ts — keep these two in
-// sync if the repo ever moves).
+// GoldApple Launcher publishes releases to this GitHub repo (see the
+// `publish` block in xmcl-electron-app/build/electron-builder.config.ts —
+// keep these two in sync if the repo ever moves). This is deliberately a
+// SEPARATE public repo from the source code (which is private): GitHub
+// releases inherit the visibility of the repo they live in, and
+// electron-updater on a user's machine has no credentials, so the release
+// assets have to live somewhere public even though the code doesn't.
 const GITHUB_OWNER = 'RiqueBitt'
-const GITHUB_REPO = 'goldapple-launcher'
+const GITHUB_REPO = 'goldapple-launcher-releases'
 
 /**
  * electron-updater decides "there is an update" purely from `latest.yml`,
