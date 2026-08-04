@@ -121,6 +121,23 @@ const hintRedownload = computed(() =>
 // e reinicia instalando a versao nova. O usuario nao precisa clicar duas vezes.
 const { notify } = useNotifier()
 const updating = computed(() => downloadingUpdate.value || installing.value)
+
+// Erros que cruzam do processo principal pro renderer passam por
+// `getSerializedError` (xmcl-runtime/infra/errors/error_serialize.ts), que
+// converte a Error real num objeto plano só com `message`/`name`/`stack` —
+// ele NUNCA chega aqui como `instanceof Error`. O check antigo (`e instanceof
+// Error ? e.message : String(e)`) sempre caia no `String(e)`, que produz
+// "[object Object]" e esconde a causa real. Le o `message` direto do objeto
+// (funciona tanto pro caso serializado quanto pro raro caso de já ser um
+// Error de verdade), com fallback pra String(e) só se nem isso existir.
+function extractErrorMessage(e: unknown): string {
+  if (e && typeof e === 'object' && 'message' in e && typeof (e as any).message === 'string' && (e as any).message) {
+    return (e as any).message
+  }
+  if (e instanceof Error) return e.message
+  return String(e)
+}
+
 async function updateNow() {
   try {
     if (updateStatus.value === 'pending') {
@@ -134,7 +151,7 @@ async function updateNow() {
     notify({
       level: 'error',
       title: t('launcherUpdate.updateFailed'),
-      body: e instanceof Error ? e.message : String(e),
+      body: extractErrorMessage(e),
     })
   }
 }
