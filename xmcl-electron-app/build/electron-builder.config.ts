@@ -84,6 +84,15 @@ export const config = {
   win: {
     certificateFile: undefined as string | undefined,
     publisherName: 'GoldApple',
+    // O instalador NÃO é assinado digitalmente (não tem certificado de code
+    // signing — custa dinheiro, não configuramos ainda). Por padrão, o
+    // NsisUpdater do electron-updater roda uma verificação Authenticode no
+    // .exe baixado e compara o "publisher" com `publisherName` acima; sem
+    // assinatura nenhuma, essa verificação SEMPRE falha com "New version
+    // is not signed by the application owner" e trava a instalação mesmo
+    // com o download 100% correto. Desliga essa checagem específica (ela só
+    // faz sentido quando existe assinatura de verdade pra comparar).
+    verifyUpdateCodeSignature: false,
     icon: 'icons/dark.ico',
     electronLanguages: ['en-US'],
     target: [
