@@ -127,15 +127,9 @@ export const config = {
       StartupWMClass: 'xmcl',
     },
     category: 'Game',
-    icon: 'icons/dark.icns',
+    icon: 'icons/dark-linux.png',
     artifactName: 'goldapple-launcher-${version}-${arch}.${ext}',
-    target: [
-      { target: 'deb', arch: ['x64', 'arm64'] },
-      { target: 'rpm', arch: ['x64', 'arm64'] },
-      { target: 'AppImage', arch: ['x64', 'arm64'] },
-      { target: 'tar.xz', arch: ['x64', 'arm64'] },
-      { target: 'pacman', arch: ['x64', 'arm64'] },
-    ],
+    target: [{ target: 'AppImage', arch: ['x64'] }],
   },
   snap: {
     publish: [
