@@ -3,27 +3,46 @@ name: Diagnostico RELEASES_REPO_TOKEN (temporario)
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
-      - name: Testar RELEASES_REPO_TOKEN
+      - uses: actions/checkout@v4
+      - name: Testar RELEASES_REPO_TOKEN e gravar resultado
         env:
           GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
         run: |
-          echo "--- token tem algum valor? (tamanho, sem revelar o valor) ---"
-          echo -n "$GH_TOKEN" | wc -c
-          echo "--- quem é esse token? ---"
-          gh api user --jq '.login' || echo "FALHOU: gh api user"
-          echo "--- escopos do token ---"
-          curl -sI -H "Authorization: token $GH_TOKEN" https://api.github.com/user | grep -i "x-oauth-scopes" || echo "FALHOU: sem header de escopos (pode ser fine-grained token)"
-          echo "--- acesso de leitura ao repo de releases? ---"
-          gh api repos/RiqueBitt/goldapple-launcher-releases --jq '.full_name, .permissions' || echo "FALHOU: sem acesso de leitura ao repo"
-          echo "--- teste real: criar+deletar um release vazio (sem asset) ---"
-          gh release create "v0.0.0-diag-token" --repo RiqueBitt/goldapple-launcher-releases --title "diag" --notes "diag" --draft && echo "CRIAR RELEASE: OK" || echo "CRIAR RELEASE: FALHOU"
-          gh release delete "v0.0.0-diag-token" --repo RiqueBitt/goldapple-launcher-releases --yes || echo "(limpeza: nao tinha nada pra apagar ou falhou a limpeza)"
-          echo "--- teste real: upload de asset pequeno ---"
-          RID=$(gh release create "v0.0.0-diag-token2" --repo RiqueBitt/goldapple-launcher-releases --title "diag2" --notes "diag2" --draft --json databaseId --jq '.databaseId' 2>&1) || echo "criar release2 falhou: $RID"
-          echo "teste" > teste.zip
-          gh release upload "v0.0.0-diag-token2" teste.zip --repo RiqueBitt/goldapple-launcher-releases && echo "UPLOAD: OK" || echo "UPLOAD: FALHOU"
-          gh release delete "v0.0.0-diag-token2" --repo RiqueBitt/goldapple-launcher-releases --yes || true
+          set +e
+          {
+            echo "=== token tem algum valor? (tamanho, sem revelar) ==="
+            echo -n "$GH_TOKEN" | wc -c
+            echo "=== quem eh esse token? ==="
+            gh api user --jq '.login' 2>&1
+            echo "=== escopos (classic token) ==="
+            curl -sI -H "Authorization: token $GH_TOKEN" https://api.github.com/user 2>&1 | grep -i "x-oauth-scopes"
+            echo "=== acesso de leitura ao repo releases + permissions ==="
+            gh api repos/RiqueBitt/goldapple-launcher-releases --jq '{full_name, permissions}' 2>&1
+            echo "=== criar release vazio (sem asset) ==="
+            gh release create "v0.0.0-diag-token" --repo RiqueBitt/goldapple-launcher-releases --title diag --notes diag --draft 2>&1
+            echo "CODIGO CRIAR: $?"
+            echo "=== upload de asset pequeno ==="
+            echo teste > teste.zip
+            gh release upload "v0.0.0-diag-token" teste.zip --repo RiqueBitt/goldapple-launcher-releases 2>&1
+            echo "CODIGO UPLOAD: $?"
+            echo "=== limpeza ==="
+            gh release delete "v0.0.0-diag-token" --repo RiqueBitt/goldapple-launcher-releases --yes 2>&1
+          } > /tmp/diag-result.txt 2>&1
+          cat /tmp/diag-result.txt
+      - name: Gravar resultado no repositorio
+        if: always()
+        run: |
+          mkdir -p .diag
+          cp /tmp/diag-result.txt .diag/result.txt || echo "sem resultado capturado" > .diag/result.txt
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add .diag/result.txt
+          git commit -m "Resultado do diagnostico" || echo "nada para commitar"
+          git push
