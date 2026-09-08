@@ -1,0 +1,120 @@
+name: Build ProjectMC release
+
+# Empacota este launcher (fork "GoldApple Launcher") no formato exato que
+# o módulo ProjectMC do Project Club espera consumir — ver handoff
+# "Integração do ProjectMC no Project Club": ProjectMC.exe (Windows,
+# pasta desempacotada) + ProjectMC.AppImage (Linux, sozinho), publicados
+# como uma release em RiqueBitt/goldapple-launcher-releases.
+#
+# NUNCA use este workflow pra publicar uma release "normal" do launcher
+# pro público em geral (isso já existe via outros workflows deste
+# repositório) — este é só pro pacote consumido pelo Project Club.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versão a publicar (ex: 1.0.0) — usada na tag e no nome dos arquivos'
+        required: true
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.10.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: pnpm install
+      - run: pnpm run build:renderer
+      - name: Build Windows (modo pasta, sem instalador)
+        working-directory: xmcl-electron-app
+        run: pnpm run build
+      - name: Renomear para ProjectMC.exe e compactar
+        shell: pwsh
+        run: |
+          $outDir = Get-ChildItem -Path xmcl-electron-app/build/output -Directory -Recurse |
+            Where-Object { Test-Path (Join-Path $_.FullName 'GoldApple Launcher.exe') } |
+            Select-Object -First 1
+          if (-not $outDir) { throw "Não encontrei a pasta com GoldApple Launcher.exe — o build pode ter mudado de formato." }
+          Rename-Item -Path (Join-Path $outDir.FullName 'GoldApple Launcher.exe') -NewName 'ProjectMC.exe'
+          Compress-Archive -Path (Join-Path $outDir.FullName '*') -DestinationPath "projectmc-${{ inputs.version }}-win.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: projectmc-win
+          path: projectmc-${{ inputs.version }}-win.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.10.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: pnpm install
+      - run: pnpm run build:renderer
+      - name: Restringir build Linux a AppImage (só nesta execução)
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = 'xmcl-electron-app/build/electron-builder.config.ts';
+            let content = fs.readFileSync(path, 'utf8');
+            // BUG CORRIGIDO em relação ao rascunho original deste workflow:
+            // o regex antigo ('{ target: 'deb'[\s\S]*?{ target: 'pacman'[^\]]*}')
+            // nunca casava de verdade — cada entrada do array tem seu próprio
+            // 'arch: [...]' aninhado, e o '[^\]]*' final parava no PRIMEIRO ']'
+            // que encontrasse (o do array 'arch' interno), nunca chegando no '}'
+            // que fecha o objeto 'pacman'. Testado contra o arquivo real deste
+            // repositório antes de publicar este workflow — o regex antigo dava
+            // 'MUDOU: false' (nada substituído), o que faria a etapa de build
+            // Linux travar aqui mesmo, no if abaixo, antes de compilar qualquer
+            // coisa. O regex novo casa cada '{ target: X, arch: [...] }' como
+            // uma unidade própria, sem precisar atravessar o array todo de uma
+            // vez com '[\s\S]*?' — e já foi confirmado que bate exatamente 1 vez
+            // no arquivo, no lugar certo.
+            const re = /target:\s*\[\s*(?:\{\s*target:\s*'[\w.]+',\s*arch:\s*\[[^\]]*\]\s*\},?\s*)+\]/;
+            const replaced = content.replace(re, \"target: [{ target: 'AppImage', arch: ['x64'] }]\");
+            if (replaced === content) { throw new Error('Não encontrei o bloco de targets Linux para substituir — o arquivo pode ter mudado de formato.'); }
+            fs.writeFileSync(path, replaced);
+          "
+      - name: Build Linux (AppImage)
+        working-directory: xmcl-electron-app
+        env:
+          BUILD_TARGET: all
+        run: pnpm run build
+      - name: Renomear para ProjectMC.AppImage e compactar
+        run: |
+          set -e
+          APPIMAGE=$(find xmcl-electron-app/build/output -maxdepth 1 -name "*.AppImage" | head -n1)
+          if [ -z "$APPIMAGE" ]; then echo "Não encontrei nenhum .AppImage gerado."; exit 1; fi
+          cp "$APPIMAGE" ProjectMC.AppImage
+          chmod +x ProjectMC.AppImage
+          zip "projectmc-${{ inputs.version }}-linux.zip" ProjectMC.AppImage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: projectmc-linux
+          path: projectmc-${{ inputs.version }}-linux.zip
+
+  publish:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist }
+      - name: Publicar release em goldapple-launcher-releases
+        env:
+          # BUG CORRIGIDO em relação ao rascunho original: o secret citado
+          # ali era PAT_GITHUB_TOKEN, mas esse nome não existe nos secrets
+          # deste repositório (conferido antes de publicar este workflow) —
+          # o secret que já existe aqui e serve exatamente pra esse fim
+          # (escrita em goldapple-launcher-releases) se chama
+          # RELEASES_REPO_TOKEN.
+          GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
+        run: |
+          gh release create "v${{ inputs.version }}" \
+            dist/projectmc-win/projectmc-${{ inputs.version }}-win.zip \
+            dist/projectmc-linux/projectmc-${{ inputs.version }}-linux.zip \
+            --repo RiqueBitt/goldapple-launcher-releases \
+            --title "ProjectMC v${{ inputs.version }}" \
+            --notes "Build automática do ProjectMC — launcher de Minecraft opcional do Project Club."
