@@ -1,4 +1,4 @@
-name: Build Windows EXE (GoldApple Launcher)
+name: Build Windows EXE (ProjectMC)
 
 # Roda manualmente (aba Actions > Build Windows EXE > Run workflow)
 # ou automaticamente a cada push na branch main/master.
@@ -122,7 +122,7 @@ jobs:
           # precisa de um PAT com permissao la. Veja o comentario acima.
           token: ${{ secrets.RELEASES_REPO_TOKEN }}
           tag_name: v${{ github.run_number }}
-          name: GoldApple Launcher build ${{ github.run_number }}
+          name: ProjectMC build ${{ github.run_number }}
           # Descricao curta que aparece no popup de atualizacao do launcher:
           # a propria mensagem do commit que gerou este build.
           body: ${{ github.event.head_commit.message }}

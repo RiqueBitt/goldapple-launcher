@@ -72,7 +72,7 @@
       v-else
       hover
       style="width: 100%"
-      to="https://github.com/RiqueBitt/goldapple-launcher/releases"
+      to="https://github.com/RiqueBitt/goldapple-launcher-releases/releases"
       target="browser"
       push
     >
@@ -157,7 +157,7 @@ async function updateNow() {
 }
 
 const openGithub = () => {
-  window.open('https://github.com/RiqueBitt/goldapple-launcher/releases', 'browser')
+  window.open('https://github.com/RiqueBitt/goldapple-launcher-releases/releases', 'browser')
 }
 </script>
 

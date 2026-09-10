@@ -5,16 +5,16 @@ import type { Configuration } from 'electron-builder'
 dotenv()
 
 export const config = {
-  productName: 'GoldApple Launcher',
-  appId: 'com.goldapple.launcher',
+  productName: 'ProjectMC',
+  appId: 'com.projectclub.projectmc',
   directories: {
     output: 'build/output',
     buildResources: 'build',
     app: '.',
   },
   protocols: {
-    name: 'GoldApple',
-    schemes: ['goldapple'],
+    name: 'ProjectMC',
+    schemes: ['projectmc'],
   },
   // assign publish for auto-updater
   // O codigo-fonte (este repositorio) e privado. O electron-updater precisa
@@ -41,12 +41,12 @@ export const config = {
   }],
   artifactName: 'goldapple-launcher-${version}-${platform}-${arch}.${ext}',
   appx: {
-    displayName: 'GoldApple Launcher',
-    applicationId: 'GoldAppleLauncher',
-    identityName: 'GoldAppleLauncher',
+    displayName: 'ProjectMC',
+    applicationId: 'ProjectMC',
+    identityName: 'ProjectMC',
     backgroundColor: 'transparent',
     publisher: process.env.PUBLISHER,
-    publisherDisplayName: 'GoldApple',
+    publisherDisplayName: 'Project Club',
     setBuildNumber: true,
   },
   dmg: {
@@ -83,7 +83,7 @@ export const config = {
   },
   win: {
     certificateFile: undefined as string | undefined,
-    publisherName: 'GoldApple',
+    publisherName: 'Project Club',
     // O instalador NÃO é assinado digitalmente (não tem certificado de code
     // signing — custa dinheiro, não configuramos ainda). Por padrão, o
     // NsisUpdater do electron-updater roda uma verificação Authenticode no

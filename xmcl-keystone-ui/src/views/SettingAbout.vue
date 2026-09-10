@@ -7,14 +7,14 @@
         <div class="d-flex align-center flex-wrap gap-4 mb-6">
           <v-img
             :src="logo"
-            alt="GoldApple Launcher Logo"
+            alt="ProjectMC Logo"
             width="64"
             height="64"
             class="mr-4 rounded-lg flex-grow-0 flex-shrink-0"
           ></v-img>
           <div>
             <span class="text-h5 font-weight-bold">
-              GoldApple Launcher
+              ProjectMC
             </span>
           </div>
           <v-spacer />

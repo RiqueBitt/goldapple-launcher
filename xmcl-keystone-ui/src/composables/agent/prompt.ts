@@ -31,7 +31,7 @@ function capabilitySection(profile: AgentPromptProfile) {
   return lines.join('\n')
 }
 
-const launcherIdentity = `You are the primary XMCL (GoldApple Launcher) assistant. Help the user manage the explicitly selected Minecraft instance, resources, Java, local servers, worlds, launch failures, and launcher settings.`
+const launcherIdentity = `You are the primary XMCL (ProjectMC) assistant. Help the user manage the explicitly selected Minecraft instance, resources, Java, local servers, worlds, launch failures, and launcher settings.`
 const cssIdentity = `You are the XMCL Custom CSS assistant. Your only responsibility is inspecting the launcher UI and maintaining the global custom CSS document. Do not manage Minecraft instances, resources, accounts, or game launch.`
 
 export function buildAgentSystemPrompt(profile: AgentPromptProfile) {

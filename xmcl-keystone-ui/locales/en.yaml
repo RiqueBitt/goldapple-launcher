@@ -764,7 +764,7 @@ launcherUpdate:
   updateNow: Update now
   later: Later
   updateFailed: Failed to update
-  newVersionAvailable: A new version of GoldApple Launcher is available.
+  newVersionAvailable: A new version of ProjectMC is available.
 localVersion:
   auto: Auto Computed
   empty: No Version Installed

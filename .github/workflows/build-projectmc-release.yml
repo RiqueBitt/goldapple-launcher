@@ -30,14 +30,17 @@ jobs:
       - name: Build Windows (modo pasta, sem instalador)
         working-directory: xmcl-electron-app
         run: pnpm run build
-      - name: Renomear para ProjectMC.exe e compactar
+      - name: Compactar
         shell: pwsh
         run: |
+          # A partir do rebranding do productName (GoldApple Launcher -> ProjectMC,
+          # ver xmcl-electron-app/build/electron-builder.config.ts), o
+          # electron-builder já gera o executável como "ProjectMC.exe" direto —
+          # não precisa mais localizar e renomear "GoldApple Launcher.exe" aqui.
           $outDir = Get-ChildItem -Path xmcl-electron-app/build/output -Directory -Recurse |
-            Where-Object { Test-Path (Join-Path $_.FullName 'GoldApple Launcher.exe') } |
+            Where-Object { Test-Path (Join-Path $_.FullName 'ProjectMC.exe') } |
             Select-Object -First 1
-          if (-not $outDir) { throw "Não encontrei a pasta com GoldApple Launcher.exe — o build pode ter mudado de formato." }
-          Rename-Item -Path (Join-Path $outDir.FullName 'GoldApple Launcher.exe') -NewName 'ProjectMC.exe'
+          if (-not $outDir) { throw "Não encontrei a pasta com ProjectMC.exe — o build pode ter mudado de formato ou o productName foi alterado de novo." }
           Compress-Archive -Path (Join-Path $outDir.FullName '*') -DestinationPath "projectmc-${{ inputs.version }}-win.zip"
       - uses: actions/upload-artifact@v4
         with:

@@ -1,12 +1,12 @@
-# GoldApple Launcher — guia rápido
+# ProjectMC — guia rápido
 
 Este projeto é um fork rebrandizado do **X Minecraft Launcher** (MIT license),
-renomeado para "GoldApple Launcher". Todas as funcionalidades originais foram
+renomeado para "ProjectMC". Todas as funcionalidades originais foram
 mantidas (mods, modpacks, CurseForge/Modrinth, multiplayer, contas, etc).
 
 ## O que foi alterado
 
-- Nome exibido em toda a interface: `X Minecraft Launcher` → `GoldApple Launcher`
+- Nome exibido em toda a interface: `X Minecraft Launcher` → `ProjectMC`
 - `appId`, protocolo customizado (`xmcl://` → `goldapple://`) e identificadores do pacote Windows
 - Ícones substituídos pela maçã dourada em todos os formatos (`.ico`, `.icns`, tiles do Windows)
 - Nome dos arquivos gerados: `goldapple-launcher-...`
@@ -19,7 +19,7 @@ mantidas (mods, modpacks, CurseForge/Modrinth, multiplayer, contas, etc).
 
 1. Suba este projeto para o seu repositório no GitHub
 2. Vá na aba **Actions** do repositório no GitHub
-3. Rode o workflow **"Build Windows EXE (GoldApple Launcher)"** manualmente
+3. Rode o workflow **"Build Windows EXE (ProjectMC)"** manualmente
    (botão "Run workflow"), ou apenas espere — ele roda sozinho a cada push
 4. Quando terminar (~15-25 min), a Release mais recente vai ter o `.exe` pronto
    pra baixar (aba **Releases** do repositório)

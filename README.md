@@ -1,8 +1,8 @@
 <p align="center">
-  <img alt="GoldApple Launcher" width="100" src="https://raw.githubusercontent.com/RiqueBitt/goldapple-launcher/main/xmcl-electron-app/icons/dark@256x256.png">
+  <img alt="ProjectMC" width="100" src="https://raw.githubusercontent.com/RiqueBitt/goldapple-launcher/main/xmcl-electron-app/icons/dark@256x256.png">
 </p>
 
-<h1 align="center">GoldApple Launcher</h1>
+<h1 align="center">ProjectMC</h1>
 
 <p align="center">
   Um jeito melhor de jogar Minecraft: gerencie instâncias, mods, modpacks e contas em um só lugar.
@@ -22,7 +22,7 @@
 
 ## Sobre
 
-GoldApple Launcher é um launcher de Minecraft com suporte a múltiplas instâncias,
+ProjectMC é um launcher de Minecraft com suporte a múltiplas instâncias,
 mods, modpacks (CurseForge e Modrinth), contas e multiplayer P2P.
 
 ## Download
@@ -57,7 +57,7 @@ Veja também [LEIA-ME-GOLDAPPLE.md](LEIA-ME-GOLDAPPLE.md) para o guia de build v
 ## Créditos
 
 Este projeto é um fork do [X Minecraft Launcher](https://github.com/Voxelum/x-minecraft-launcher)
-(MIT License), rebrandizado como GoldApple Launcher. Todo o crédito pela base do
+(MIT License), rebrandizado como ProjectMC. Todo o crédito pela base do
 código original vai para os autores e colaboradores do X Minecraft Launcher.
 
 ## Licença

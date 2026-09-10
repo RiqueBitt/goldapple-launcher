@@ -4,7 +4,7 @@
     "main": "./index.js",
     "version": "0.65.1",
     "author": "ci010 <cijhn@hotmail.com>",
-    "description": "GoldApple Launcher - A modern Minecraft launcher",
+    "description": "ProjectMC - A modern Minecraft launcher",
     "license": "MIT",
     "engines": {
         "node": ">=22.16.0"

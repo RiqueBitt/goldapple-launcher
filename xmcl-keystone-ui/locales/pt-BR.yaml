@@ -613,7 +613,7 @@ launcherUpdate:
   updateNow: Atualizar agora
   later: Depois
   updateFailed: Falha ao atualizar
-  newVersionAvailable: Uma nova versão do GoldApple Launcher está disponível.
+  newVersionAvailable: Uma nova versão do ProjectMC está disponível.
 localVersion:
   auto: Computado automaticamente
   empty: Nenhuma versão instalada

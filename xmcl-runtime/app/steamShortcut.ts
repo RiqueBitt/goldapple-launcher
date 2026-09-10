@@ -170,7 +170,7 @@ function writeObject(chunks: Buffer[], key: string, write: () => void) {
 function serializeShortcut(index: number, shortcut: SteamShortcut): Buffer {
   const chunks: Buffer[] = []
   writeObject(chunks, index.toString(), () => {
-    writeString(chunks, 'AppName', 'GoldApple Launcher')
+    writeString(chunks, 'AppName', 'ProjectMC')
     writeString(chunks, 'Exe', shortcut.executable)
     writeString(chunks, 'StartDir', shortcut.startDir)
     writeString(chunks, 'icon', shortcut.icon)
@@ -196,7 +196,7 @@ export function addSteamShortcutToVdf(buffer: Buffer, shortcut: SteamShortcut): 
   const parsed = buffer.length === 0 ? { endOffset: 0, entries: [] } : parseShortcuts(buffer)
 
   if (
-    parsed.entries.some(({ appName }) => appName === 'GoldApple Launcher' || appName === 'Aurora Launcher' || appName === 'XMCL')
+    parsed.entries.some(({ appName }) => appName === 'ProjectMC' || appName === 'Aurora Launcher' || appName === 'XMCL')
   ) {
     return undefined
   }
