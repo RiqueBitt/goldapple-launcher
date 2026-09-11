@@ -79,7 +79,9 @@ export const vuetify = createVuetify({
           // #4C9FFF) pra manter os dois apps do mesmo ecossistema
           // visualmente consistentes, em vez de escolher um azul
           // qualquer sem relação com o resto.
-          primary: '#4C9FFF',
+          // Item pedido: "Primária Color do launcher de minecraft em R
+          // 54 G 98 B 164 A 1" — #3662A4 exato.
+          primary: '#3662A4',
           accent: '#7CBBFF',
         },
       },
