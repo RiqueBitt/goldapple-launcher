@@ -99,8 +99,6 @@ jobs:
         with:
           name: projectmc-linux
           path: projectmc-${{ inputs.version }}-linux.AppImage
-          name: projectmc-linux
-          path: projectmc-${{ inputs.version }}-linux.zip
 
   publish:
     needs: [build-windows, build-linux]
