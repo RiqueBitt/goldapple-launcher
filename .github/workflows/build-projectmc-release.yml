@@ -88,16 +88,17 @@ jobs:
         env:
           BUILD_TARGET: all
         run: pnpm run build
-      - name: Renomear para ProjectMC.AppImage e compactar
+      - name: Renomear para ProjectMC.AppImage
         run: |
           set -e
           APPIMAGE=$(find xmcl-electron-app/build/output -maxdepth 1 -name "*.AppImage" | head -n1)
           if [ -z "$APPIMAGE" ]; then echo "Não encontrei nenhum .AppImage gerado."; exit 1; fi
-          cp "$APPIMAGE" ProjectMC.AppImage
-          chmod +x ProjectMC.AppImage
-          zip "projectmc-${{ inputs.version }}-linux.zip" ProjectMC.AppImage
+          cp "$APPIMAGE" "projectmc-${{ inputs.version }}-linux.AppImage"
+          chmod +x "projectmc-${{ inputs.version }}-linux.AppImage"
       - uses: actions/upload-artifact@v4
         with:
+          name: projectmc-linux
+          path: projectmc-${{ inputs.version }}-linux.AppImage
           name: projectmc-linux
           path: projectmc-${{ inputs.version }}-linux.zip
 
@@ -119,7 +120,7 @@ jobs:
         run: |
           gh release create "v${{ inputs.version }}" \
             dist/projectmc-win/projectmc-${{ inputs.version }}-win.exe \
-            dist/projectmc-linux/projectmc-${{ inputs.version }}-linux.zip \
+            dist/projectmc-linux/projectmc-${{ inputs.version }}-linux.AppImage \
             --repo RiqueBitt/goldapple-launcher-releases \
             --title "ProjectMC v${{ inputs.version }}" \
             --notes "Build automática do ProjectMC — launcher de Minecraft opcional do Project Club."
