@@ -83,31 +83,30 @@ export function getDefaultTheme(): UIThemeDataV1 {
     dark: 'system',
     backgroundMusic: [],
     backgroundMusicPlayOrder: 'sequential',
-    // Item pedido: "tema laranja... deixa a cara do project club" — cores
-    // primária/destaque trocadas do amarelo/dourado original (combinava com
-    // a identidade "maçã dourada" do fork anterior) pra um laranja vibrante,
-    // puxando pro tom do logo do Project Club (uma fatia de fruta cítrica).
+    // Item pedido: "troque a cor laranja... para um tom azul" — mesma cor
+    // de marca do Project Club (--brand no CSS do site, #4C9FFF) pra
+    // manter os dois apps do mesmo ecossistema visualmente consistentes.
     colors: {
       lightAppBarColor: '#e0e0e0FF',
       lightSideBarColor: '#FFFFFFFF',
       darkAppBarColor: '#111111FF',
       darkSideBarColor: '#11111166',
-      darkPrimaryColor: '#FF7A1A',
+      darkPrimaryColor: '#4C9FFF',
       darkBackground: '#000000FF',
       darkInfoColor: '#2196F3',
       darkErrorColor: '#FF5252',
       darkWarningColor: '#FB8C00',
 
       darkSuccessColor: '#4CAF50',
-      darkAccentColor: '#FFB74D',
+      darkAccentColor: '#7CBBFF',
       darkCardColor: '#0c0c0ccc',
-      lightPrimaryColor: '#FF7A1A',
+      lightPrimaryColor: '#4C9FFF',
       lightBackground: '#FFFFFF',
       lightInfoColor: '#2196F3',
       lightErrorColor: '#FF5252',
       lightWarningColor: '#FB8C00',
       lightSuccessColor: '#4CAF50',
-      lightAccentColor: '#FFB74D',
+      lightAccentColor: '#7CBBFF',
       lightCardColor: '#e0e0e080' },
     backgroundColorOverlay: true,
     backgroundVolume: 1,

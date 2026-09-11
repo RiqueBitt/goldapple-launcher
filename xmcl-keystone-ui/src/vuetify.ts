@@ -74,8 +74,13 @@ export const vuetify = createVuetify({
       dark: {
         dark: true,
         colors: {
-          primary: '#FF7A1A',
-          accent: '#FFB74D',
+          // Item pedido: "troque a cor laranja... para um tom azul" —
+          // mesma cor de marca do Project Club (--brand no CSS do site,
+          // #4C9FFF) pra manter os dois apps do mesmo ecossistema
+          // visualmente consistentes, em vez de escolher um azul
+          // qualquer sem relação com o resto.
+          primary: '#4C9FFF',
+          accent: '#7CBBFF',
         },
       },
     },
