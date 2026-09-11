@@ -19,8 +19,6 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -31,22 +29,18 @@ jobs:
       - run: pnpm run build:renderer
       - name: Build Windows (portável, sem instalador nem pasta de arquivos)
         working-directory: xmcl-electron-app
-        run: pnpm run build
-      - name: DIAGNOSTICO temporario - listar tudo gerado
-        shell: pwsh
-        run: |
-          $files = Get-ChildItem -Path xmcl-electron-app/build/output -Recurse -File | Select-Object -ExpandProperty FullName
-          $files | Out-File -FilePath diag-output.txt -Encoding utf8
-      - name: DIAGNOSTICO temporario - gravar no repositorio
-        shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
-          git add diag-output.txt
-          git commit -m "Diagnostico temporario" || echo "nada para commitar"
-          git push "https://x-access-token:${GH_TOKEN}@github.com/RiqueBitt/goldapple-launcher.git" HEAD:main
+          # BUG CORRIGIDO: sem essa variável, build.ts (a lógica real por
+          # trás do script "pnpm run build" — ver `const dir =
+          # !(process.env.BUILD_TARGET || ...)`) ignora COMPLETAMENTE os
+          # targets configurados em electron-builder.config.ts (incluindo
+          # o 'portable' que preciso) e cai sozinho em modo "dir" (só a
+          # pasta win-unpacked, sem nenhum .exe solto) — passou
+          # despercebido até agora porque "modo dir" também gerava a
+          # pasta com ProjectMC.exe dentro, que era exatamente o formato
+          # (antigo, zip com pasta) que este workflow usava antes.
+          BUILD_TARGET: all
+        run: pnpm run build
       - name: Renomear o portátil para ProjectMC.exe
         shell: pwsh
         run: |
