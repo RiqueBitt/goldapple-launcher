@@ -110,6 +110,21 @@ export const config = {
           'ia32',
         ],
       },
+      // Item pedido (Project Club): "criar uma pasta com o .exe do
+      // launcher... em vez de baixar vários arquivos, baixar o .exe...
+      // quando clicar em jogar ele abre o .exe" — um único .exe
+      // portátil (sem instalador, sem pasta cheia de DLLs/app.asar pra
+      // baixar e extrair na mão do lado de fora) que se auto-extrai
+      // sozinho pro %LOCALAPPDATA%\Temp na hora de abrir, usando o
+      // próprio mecanismo do NSIS (muito mais testado que qualquer
+      // download+extração+verificação feita por fora). Resolve de vez
+      // a origem de praticamente todos os problemas de "pacote
+      // corrompido" enfrentados: não tem mais zip nem app.asar pra
+      // baixar/verificar do lado de fora — só um arquivo.
+      {
+        target: 'portable',
+        arch: ['x64'],
+      },
     ],
   },
   nsis: {
@@ -118,6 +133,9 @@ export const config = {
     allowToChangeInstallationDirectory: true,
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
+  },
+  portable: {
+    artifactName: 'projectmc-portable-${version}.${ext}',
   },
   linux: {
     executableName: 'xmcl',

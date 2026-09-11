@@ -27,25 +27,27 @@ jobs:
         with: { node-version: '22' }
       - run: pnpm install
       - run: pnpm run build:renderer
-      - name: Build Windows (modo pasta, sem instalador)
+      - name: Build Windows (portável, sem instalador nem pasta de arquivos)
         working-directory: xmcl-electron-app
         run: pnpm run build
-      - name: Compactar
+      - name: Renomear o portátil para ProjectMC.exe
         shell: pwsh
         run: |
-          # A partir do rebranding do productName (GoldApple Launcher -> ProjectMC,
-          # ver xmcl-electron-app/build/electron-builder.config.ts), o
-          # electron-builder já gera o executável como "ProjectMC.exe" direto —
-          # não precisa mais localizar e renomear "GoldApple Launcher.exe" aqui.
-          $outDir = Get-ChildItem -Path xmcl-electron-app/build/output -Directory -Recurse |
-            Where-Object { Test-Path (Join-Path $_.FullName 'ProjectMC.exe') } |
-            Select-Object -First 1
-          if (-not $outDir) { throw "Não encontrei a pasta com ProjectMC.exe — o build pode ter mudado de formato ou o productName foi alterado de novo." }
-          Compress-Archive -Path (Join-Path $outDir.FullName '*') -DestinationPath "projectmc-${{ inputs.version }}-win.zip"
+          # Item pedido (Project Club): "em vez de baixar vários arquivos,
+          # baixar o .exe... quando clicar em jogar ele abre o .exe" — o
+          # target "portable" do electron-builder (ver
+          # xmcl-electron-app/build/electron-builder.config.ts, seção win)
+          # já gera um único .exe auto-extraível, sem precisar de pasta
+          # "unpacked" nem zip nenhum do lado de fora. Ainda gera nsis+zip
+          # também (outros usos deste repositório) — este step só pega o
+          # arquivo "portable" específico entre os vários gerados.
+          $portableExe = Get-ChildItem -Path xmcl-electron-app/build/output -Filter "projectmc-portable-*.exe" -Recurse | Select-Object -First 1
+          if (-not $portableExe) { throw "Não encontrei o .exe portátil (projectmc-portable-*.exe) — o build pode ter mudado de formato ou o target 'portable' foi removido da config." }
+          Copy-Item $portableExe.FullName -Destination "projectmc-${{ inputs.version }}-win.exe"
       - uses: actions/upload-artifact@v4
         with:
           name: projectmc-win
-          path: projectmc-${{ inputs.version }}-win.zip
+          path: projectmc-${{ inputs.version }}-win.exe
 
   build-linux:
     runs-on: ubuntu-latest
@@ -116,7 +118,7 @@ jobs:
           GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
         run: |
           gh release create "v${{ inputs.version }}" \
-            dist/projectmc-win/projectmc-${{ inputs.version }}-win.zip \
+            dist/projectmc-win/projectmc-${{ inputs.version }}-win.exe \
             dist/projectmc-linux/projectmc-${{ inputs.version }}-linux.zip \
             --repo RiqueBitt/goldapple-launcher-releases \
             --title "ProjectMC v${{ inputs.version }}" \
