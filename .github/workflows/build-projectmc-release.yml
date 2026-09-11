@@ -32,7 +32,14 @@ jobs:
         run: pnpm run build
       - name: DIAGNOSTICO temporario - listar tudo gerado
         shell: pwsh
-        run: Get-ChildItem -Path xmcl-electron-app/build/output -Recurse -File | Select-Object FullName | Format-Table -AutoSize -Wrap | Out-String -Width 300
+        run: |
+          $files = Get-ChildItem -Path xmcl-electron-app/build/output -Recurse -File | Select-Object -ExpandProperty FullName
+          $files | Out-File -FilePath diag-output.txt -Encoding utf8
+          $files
+      - uses: actions/upload-artifact@v4
+        with:
+          name: diag-output
+          path: diag-output.txt
       - name: Renomear o portátil para ProjectMC.exe
         shell: pwsh
         run: |
