@@ -19,6 +19,8 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -35,11 +37,16 @@ jobs:
         run: |
           $files = Get-ChildItem -Path xmcl-electron-app/build/output -Recurse -File | Select-Object -ExpandProperty FullName
           $files | Out-File -FilePath diag-output.txt -Encoding utf8
-          $files
-      - uses: actions/upload-artifact@v4
-        with:
-          name: diag-output
-          path: diag-output.txt
+      - name: DIAGNOSTICO temporario - gravar no repositorio
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add diag-output.txt
+          git commit -m "Diagnostico temporario" || echo "nada para commitar"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/RiqueBitt/goldapple-launcher.git" HEAD:main
       - name: Renomear o portátil para ProjectMC.exe
         shell: pwsh
         run: |
